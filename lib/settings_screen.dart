@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'theme_provider.dart';
 import 'timer_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -45,8 +47,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Configurações')),
+      appBar: AppBar(
+        title: Text('Configurações'),
+        actions: [
+          Text('Dark/Light'),
+          Switch(
+            value: themeProvider.themeMode == ThemeMode.dark,
+            onChanged: (value) {
+              themeProvider.toggleTheme();
+            },
+          ),
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -81,11 +97,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
                 textStyle: TextStyle(fontSize: 30),
+                backgroundColor: isDarkMode ? Colors.white : Colors.black,
+                foregroundColor: isDarkMode ? Colors.black : Colors.white,
               ),
-              child: Text(
-                'Iniciar',
-                style: TextStyle(color: Colors.black),
-              ),
+              child: Text('Começar'),
             ),
           ],
         ),

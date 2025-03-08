@@ -23,10 +23,9 @@ class _TimerScreenState extends State<TimerScreen> {
   void initState() {
     super.initState();
     isWalking = true;
-    currentTime = widget.walkTime; // Começa com o tempo de caminhada
+    currentTime = widget.walkTime;
   }
 
-  // Função para formatar o tempo no formato MM:SS
   String formatTime(int seconds) {
     int minutes = seconds ~/ 60;
     int remainingSeconds = seconds % 60;
@@ -73,7 +72,6 @@ class _TimerScreenState extends State<TimerScreen> {
     });
   }
 
-  // Função para resetar o timer para o tempo de corrida
   void resetToRun() {
     setState(() {
       isWalking = false;
@@ -84,7 +82,6 @@ class _TimerScreenState extends State<TimerScreen> {
     });
   }
 
-  // Função para resetar o timer para o tempo de caminhada
   void resetToWalk() {
     setState(() {
       isWalking = true;
@@ -103,6 +100,8 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Temporizador'),
@@ -115,7 +114,7 @@ class _TimerScreenState extends State<TimerScreen> {
             GestureDetector(
               onTap: () {
                 setState(() {
-                  isMale = !isMale; // Alterna entre homem e mulher
+                  isMale = !isMale;
                 });
               },
               child: Text(
@@ -126,7 +125,7 @@ class _TimerScreenState extends State<TimerScreen> {
               ),
             ),
             Text(
-              formatTime(currentTime), // Exibe o tempo no formato MM:SS
+              formatTime(currentTime),
               style: TextStyle(fontSize: 80),
             ),
             Text(
@@ -136,29 +135,38 @@ class _TimerScreenState extends State<TimerScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: isRunning ? stopTimer : startTimer,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isRunning
+                    ? (isDarkMode ? Colors.red : Colors.red)
+                    : (isDarkMode ? Colors.green : Colors.green),
+                foregroundColor: isRunning
+                    ? (isDarkMode ? Colors.white : Colors.white)
+                    : (isDarkMode ? Colors.white : Colors.white),
+              ),
               child: Text(
                 isRunning ? 'Parar' : 'Iniciar',
-                style: TextStyle(
-                    fontSize: 40, color: isRunning ? Colors.red : Colors.green),
+                style: TextStyle(fontSize: 40),
               ),
             ),
             SizedBox(height: 50),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Botão para resetar o timer para o tempo de corrida
                 ElevatedButton(
                   onPressed: resetToRun,
-                  child: Text(
-                    'Começar Corrida',
-                    style: TextStyle(color: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDarkMode ? Colors.white : Colors.black,
+                    foregroundColor: isDarkMode ? Colors.black : Colors.white,
                   ),
+                  child: Text('Começar Corrida'),
                 ),
-                // Botão para resetar o timer para o tempo de caminhada
                 ElevatedButton(
                   onPressed: resetToWalk,
-                  child: Text('Começar Caminhada',
-                      style: TextStyle(color: Colors.black)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDarkMode ? Colors.white : Colors.black,
+                    foregroundColor: isDarkMode ? Colors.black : Colors.white,
+                  ),
+                  child: Text('Começar Caminhada'),
                 ),
               ],
             ),
