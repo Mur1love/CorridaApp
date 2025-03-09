@@ -10,10 +10,8 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  final TextEditingController runMinutesController = TextEditingController();
-  final TextEditingController runSecondsController = TextEditingController();
-  final TextEditingController walkMinutesController = TextEditingController();
-  final TextEditingController walkSecondsController = TextEditingController();
+  TimeOfDay runTime = const TimeOfDay(hour: 0, minute: 1);
+  TimeOfDay walkTime = const TimeOfDay(hour: 0, minute: 3);
 
   @override
   void initState() {
@@ -24,25 +22,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      runMinutesController.text = (prefs.getInt('runMinutes') ?? 1).toString();
-      runSecondsController.text = (prefs.getInt('runSeconds') ?? 0).toString();
-      walkMinutesController.text =
-          (prefs.getInt('walkMinutes') ?? 3).toString();
-      walkSecondsController.text =
-          (prefs.getInt('walkSeconds') ?? 0).toString();
+      runTime = TimeOfDay(
+        hour: 0,
+        minute: prefs.getInt('runMinutes') ?? 1,
+      );
+      walkTime = TimeOfDay(
+        hour: 0,
+        minute: prefs.getInt('walkMinutes') ?? 3,
+      );
     });
   }
 
   Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-        'runMinutes', int.tryParse(runMinutesController.text) ?? 1);
-    await prefs.setInt(
-        'runSeconds', int.tryParse(runSecondsController.text) ?? 0);
-    await prefs.setInt(
-        'walkMinutes', int.tryParse(walkMinutesController.text) ?? 3);
-    await prefs.setInt(
-        'walkSeconds', int.tryParse(walkSecondsController.text) ?? 0);
+    await prefs.setInt('runMinutes', runTime.minute);
+    await prefs.setInt('walkMinutes', walkTime.minute);
+  }
+
+  Future<void> _selectTime(BuildContext context, bool isRunTime) async {
+    final TimeOfDay? picked = await showTimePicker(
+        context: context,
+        initialTime: isRunTime ? runTime : walkTime,
+        cancelText: 'CANCELAR',
+        hourLabelText: 'Minutos',
+        minuteLabelText: 'Segundos',
+        helpText: 'Digite o tempo',
+        initialEntryMode: TimePickerEntryMode.dial);
+
+    if (picked != null) {
+      setState(() {
+        if (isRunTime) {
+          runTime = picked;
+        } else {
+          walkTime = picked;
+        }
+      });
+    }
   }
 
   @override
@@ -68,35 +83,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildTimeInput('Tempo de Corrida 🏃‍♂️', runMinutesController,
-                runSecondsController),
+            _buildTimePicker(
+              'Tempo de Corrida 🏃‍♂️',
+              runTime,
+              () => _selectTime(context, true),
+            ),
             SizedBox(height: 20),
-            _buildTimeInput('Tempo de Caminhada 🚶‍♂️', walkMinutesController,
-                walkSecondsController),
+            _buildTimePicker(
+              'Tempo de Caminhada 🚶‍♂️',
+              walkTime,
+              () => _selectTime(
+                context,
+                false,
+              ),
+            ),
             SizedBox(height: 50),
             ElevatedButton(
               onPressed: () {
                 _saveSettings();
-                int runTime =
-                    (int.tryParse(runMinutesController.text) ?? 0) * 60 +
-                        (int.tryParse(runSecondsController.text) ?? 0);
-                int walkTime =
-                    (int.tryParse(walkMinutesController.text) ?? 0) * 60 +
-                        (int.tryParse(walkSecondsController.text) ?? 0);
+                int runDuration = (runTime.hour * 60) + runTime.minute;
+                int walkDuration = (walkTime.hour * 60) + walkTime.minute;
 
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => TimerScreen(
-                      runTime: runTime,
-                      walkTime: walkTime,
+                      runTime: runDuration,
+                      walkTime: walkDuration,
                     ),
                   ),
                 );
               },
               style: ElevatedButton.styleFrom(
                 padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                textStyle: TextStyle(fontSize: 30),
+                textStyle: TextStyle(fontSize: 40),
                 backgroundColor: isDarkMode ? Colors.white : Colors.black,
                 foregroundColor: isDarkMode ? Colors.black : Colors.white,
               ),
@@ -108,8 +128,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildTimeInput(String label, TextEditingController minutesController,
-      TextEditingController secondsController) {
+  Widget _buildTimePicker(String label, TimeOfDay time, VoidCallback onTap) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -118,18 +137,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Row(
           children: [
             Expanded(
-              child: TextFormField(
-                controller: minutesController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Minutos'),
-              ),
-            ),
-            SizedBox(width: 10),
-            Expanded(
-              child: TextFormField(
-                controller: secondsController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(labelText: 'Segundos'),
+              child: ElevatedButton(
+                onPressed: onTap,
+                child: Text(
+                  '${time.hour} min ${time.minute} seg',
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
               ),
             ),
           ],

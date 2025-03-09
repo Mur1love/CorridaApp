@@ -7,7 +7,7 @@ quando se deve começar a correr, parar de correr e começar a caminhar.
 
 To-do:
 
-[ ] Fazer o app funcional em segundo plano (com a tela do celular desligada).
-[ ] Melhorar o imput dos tempos da tela de configuração.
-[ ] Dark Mode e Light Mode
+- [ ] Fazer o app funcional em segundo plano (com a tela do celular desligada).
+- [x] ~Melhorar o imput dos tempos da tela de configuração.~
+- [x] ~Dark Mode e Light Mode~
 
